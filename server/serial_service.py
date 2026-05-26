@@ -2,6 +2,7 @@
 Servicio de comunicación serial con el NodeMCU.
 Maneja la conexión, envío de comandos y parsing de respuestas.
 """
+
 import contextlib
 import logging
 import time
@@ -37,9 +38,7 @@ class SerialRelayService:
             return "No se encontró ningún puerto serial con chip CH340/CP210x"
 
         try:
-            self._ser = serial.Serial(
-                target, BAUD, timeout=TIMEOUT, write_timeout=1
-            )
+            self._ser = serial.Serial(target, BAUD, timeout=TIMEOUT, write_timeout=1)
             time.sleep(1.5)
             self._ser.reset_input_buffer()
             self._puerto = target
@@ -61,7 +60,9 @@ class SerialRelayService:
         """Busca el primer puerto con chip CH340 o CP210x."""
         for puerto in serial.tools.list_ports.comports():
             if puerto.vid in (0x1A86, 0x10C4, 0x0403):  # CH340, CP210x, FTDI
-                logger.info("Auto-detectado: %s (%s)", puerto.device, puerto.description)
+                logger.info(
+                    "Auto-detectado: %s (%s)", puerto.device, puerto.description
+                )
                 return puerto.device
         return None
 

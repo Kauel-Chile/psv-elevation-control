@@ -12,6 +12,7 @@ Endpoints:
 Uso:
     uv run uvicorn server.main:app --reload --host 127.0.0.1 --port 8000
 """
+
 from __future__ import annotations
 
 import logging
@@ -63,6 +64,7 @@ app.add_middleware(
 
 # ── Schemas ─────────────────────────────────────────────────
 
+
 class RelayStatus(BaseModel):
     relay_1: str
     relay_2: str
@@ -79,6 +81,7 @@ class ErrorResponse(BaseModel):
 
 
 # ── Endpoints ───────────────────────────────────────────────
+
 
 @app.get("/api/health", response_model=HealthResponse)
 async def health():
