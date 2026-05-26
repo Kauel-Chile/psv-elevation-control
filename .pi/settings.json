@@ -1,0 +1,60 @@
+{
+	"subagents": {
+		"agentOverrides": {
+			"sdd-init": {
+				"model": "opencode-go/deepseek-v4-flash"
+			},
+			"sdd-explore": {
+				"model": "opencode-go/qwen3.6-plus"
+			},
+			"sdd-proposal": {
+				"model": "opencode-go/mimo-v2.5-pro"
+			},
+			"sdd-spec": {
+				"model": "opencode-go/glm-5.1"
+			},
+			"sdd-design": {
+				"model": "opencode-go/glm-5.1"
+			},
+			"sdd-tasks": {
+				"model": "opencode-go/minimax-m2.7"
+			},
+			"sdd-apply": {
+				"model": "opencode-go/minimax-m2.7"
+			},
+			"sdd-verify": {
+				"model": "opencode-go/deepseek-v4-pro"
+			},
+			"sdd-archive": {
+				"model": "opencode-go/deepseek-v4-flash"
+			},
+			"context-builder": {
+				"model": "opencode-go/deepseek-v4-flash"
+			},
+			"delegate": {
+				"model": "opencode-go/deepseek-v4-flash"
+			},
+			"oracle": {
+				"model": "opencode-go/deepseek-v4-pro"
+			},
+			"planner": {
+				"model": "opencode-go/deepseek-v4-pro"
+			},
+			"researcher": {
+				"model": "opencode-go/deepseek-v4-flash"
+			},
+			"reviewer": {
+				"model": "opencode-go/qwen3.6-plus"
+			},
+			"scout": {
+				"model": "opencode-go/deepseek-v4-flash"
+			},
+			"sdd-onboard": {
+				"model": "opencode-go/deepseek-v4-flash"
+			},
+			"worker": {
+				"model": "opencode-go/minimax-m2.7"
+			}
+		}
+	}
+}
