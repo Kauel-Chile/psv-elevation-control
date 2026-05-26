@@ -165,6 +165,33 @@ Respuesta de ejemplo:
 }
 ```
 
+## Arranque automático con systemd (Linux)
+
+Para que el servidor se levante solo al iniciar sesión:
+
+### 1. Permisos de serial (una sola vez)
+
+```bash
+sudo usermod -aG uucp $USER
+# Cerrar sesión y volver a entrar
+```
+
+### 2. Instalar el servicio
+
+```bash
+bash deploy/install-service.sh
+```
+
+### 3. Iniciar y verificar
+
+```bash
+systemctl --user start psv-relay-server
+systemctl --user status psv-relay-server
+journalctl --user -u psv-relay-server -f   # logs en vivo
+```
+
+A partir de ahora el servidor arranca solo al iniciar sesión en `http://127.0.0.1:8000`.
+
 ## Archivos del proyecto
 
 ```
@@ -175,7 +202,10 @@ psv-elevation-control/
 │   └── main.py               # Firmware MicroPython para NodeMCU
 ├── client/
 │   └── control_reles.py      # Cliente interactivo para PC
-└── server/
-    ├── main.py               # Servidor REST FastAPI
-    └── serial_service.py     # Servicio de comunicación serial
+├── server/
+│   ├── main.py               # Servidor REST FastAPI
+│   └── serial_service.py     # Servicio de comunicación serial
+└── deploy/
+    ├── psv-relay-server.service  # Unidad systemd
+    └── install-service.sh        # Script de instalación
 ```
