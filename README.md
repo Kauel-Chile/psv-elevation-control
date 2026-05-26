@@ -122,14 +122,45 @@ O temporalmente:
 sudo uv run client/control_reles.py
 ```
 
+## Servidor REST API
+
+```bash
+# Iniciar servidor (con permisos de serial)
+sudo uv run uvicorn server.main:app --host 127.0.0.1 --port 8000
+```
+
+### Endpoints
+
+| Método | Ruta                     | Descripción                |
+|--------|--------------------------|----------------------------|
+| `GET`  | `/api/health`            | Estado de conexión         |
+| `GET`  | `/api/relays`            | Estado de ambos relés      |
+| `POST` | `/api/relays/1/on`       | Encender relé 1            |
+| `POST` | `/api/relays/1/off`      | Apagar relé 1              |
+| `POST` | `/api/relays/2/on`       | Encender relé 2            |
+| `POST` | `/api/relays/2/off`      | Apagar relé 2              |
+| `POST` | `/api/relays/all/on`     | Encender ambos             |
+| `POST` | `/api/relays/all/off`    | Apagar ambos               |
+
+Respuesta de ejemplo:
+```json
+{
+  "relay_1": "ON",
+  "relay_2": "OFF"
+}
+```
+
 ## Archivos del proyecto
 
 ```
 psv-elevation-control/
-├── README.md               # Este archivo
+├── README.md                 # Este archivo
+├── pyproject.toml            # Proyecto Python (FastAPI + uvicorn + pyserial)
 ├── firmware/
-│   └── main.py             # Firmware MicroPython para NodeMCU
+│   └── main.py               # Firmware MicroPython para NodeMCU
 ├── client/
-│   └── control_reles.py    # Cliente interactivo para PC
-└── pyproject.toml          # Proyecto Python
+│   └── control_reles.py      # Cliente interactivo para PC
+└── server/
+    ├── main.py               # Servidor REST FastAPI
+    └── serial_service.py     # Servicio de comunicación serial
 ```

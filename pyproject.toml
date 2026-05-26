@@ -1,7 +1,11 @@
 [project]
 name = "psv-elevation-control"
 version = "0.1.0"
-description = "Add your description here"
+description = "Control de relés HW-383 con NodeMCU (ESP8266) + MicroPython"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pyserial",
+]

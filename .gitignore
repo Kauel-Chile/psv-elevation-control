@@ -10,3 +10,5 @@ wheels/
 .venv
 # Local Pi runtime state
 .atl/
+.ruff_cache/
+__pycache__/
