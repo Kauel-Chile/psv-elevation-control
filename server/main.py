@@ -11,11 +11,14 @@ Endpoints:
 
 Uso:
     uv run uvicorn server.main:app --reload --host 127.0.0.1 --port 8000
+
+    Opcional: SERIAL_PORT=COM3 para forzar puerto en Windows.
 """
 
 from __future__ import annotations
 
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
@@ -38,7 +41,8 @@ relay_service = SerialRelayService()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Conecta al NodeMCU al iniciar, desconecta al cerrar."""
-    error = relay_service.conectar()
+    puerto = os.environ.get("SERIAL_PORT")
+    error = relay_service.conectar(puerto)
     if error:
         logger.warning("⚠️  %s", error)
     else:

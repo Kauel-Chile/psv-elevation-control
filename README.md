@@ -92,7 +92,12 @@ Presionar **RST** para reiniciar. Aparecerá el prompt de comandos `> `.
 ## Cliente para PC
 
 ```bash
+# Auto-detecta el puerto (Linux / macOS)
 uv run client/control_reles.py
+
+# O especificar el puerto manualmente
+uv run client/control_reles.py /dev/ttyUSB0   # Linux
+uv run client/control_reles.py COM3           # Windows
 ```
 
 Menú interactivo:
@@ -124,9 +129,19 @@ sudo uv run client/control_reles.py
 
 ## Servidor REST API
 
+El servidor **auto-detecta** el puerto serial al arrancar.
+
 ```bash
-# Iniciar servidor (con permisos de serial)
+# Linux (con permisos de serial)
 sudo uv run uvicorn server.main:app --host 127.0.0.1 --port 8000
+
+# Windows (sin sudo)
+uv run uvicorn server.main:app --host 127.0.0.1 --port 8000
+```
+
+Si el puerto no se auto-detecta, pasarlo por variable de entorno:
+```bash
+SERIAL_PORT=COM3 uv run uvicorn server.main:app --host 127.0.0.1 --port 8000
 ```
 
 ### Endpoints

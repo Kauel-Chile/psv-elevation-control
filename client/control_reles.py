@@ -5,16 +5,18 @@
 Cliente para PC — Control de relés HW-383 vía NodeMCU (ESP8266)
 
 Uso:
-    uv run client/control_reles.py
+    uv run client/control_reles.py [puerto]
 
-Requiere: pyserial (se instala automáticamente con uv)
+Si no se pasa puerto, auto-detecta el primer CH340/CP210x/FTDI.
+En Windows ej: uv run client/control_reles.py COM3
 """
 
-import serial
 import sys
 import time
 
-PORT = "/dev/ttyUSB1"
+import serial
+import serial.tools.list_ports
+
 BAUD = 115200
 
 COMANDOS = {
@@ -26,6 +28,14 @@ COMANDOS = {
     "6": ("all off", "Apagar ambos"),
     "s": ("status", "Estado actual"),
 }
+
+
+def auto_detectar() -> str | None:
+    """Busca el primer puerto con chip CH340, CP210x o FTDI."""
+    for puerto in serial.tools.list_ports.comports():
+        if puerto.vid in (0x1A86, 0x10C4, 0x0403):
+            return puerto.device
+    return None
 
 
 def conectar(puerto: str) -> serial.Serial | None:
@@ -47,12 +57,18 @@ def enviar(ser: serial.Serial, cmd: str) -> str:
 
 
 def main():
+    puerto = sys.argv[1] if len(sys.argv) > 1 else auto_detectar()
+    if not puerto:
+        print("No se encontró el NodeMCU.")
+        print("Usá: uv run client/control_reles.py <PUERTO>")
+        print("  Linux:   /dev/ttyUSB0")
+        print("  Windows: COM3")
+        sys.exit(1)
 
-    print()
-    print(f" Conectando a {PORT}...", end=" ")
+    print(f" Conectando a {puerto}...", end=" ")
     sys.stdout.flush()
 
-    ser = conectar(PORT)
+    ser = conectar(puerto)
     if not ser:
         sys.exit(1)
 
