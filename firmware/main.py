@@ -73,7 +73,7 @@ while True:
     while True:
         hay = False
         if USESELECT:
-            r, _, _ = select.select([sys.stdin], [], [], 0.05)
+            r, _, _ = select.select([sys.stdin], [], [], 0.005)
             hay = len(r) > 0
 
         if hay:
@@ -88,4 +88,4 @@ while True:
                 else:
                     buf += c
 
-        time.sleep_ms(30)
+        time.sleep_ms(5)

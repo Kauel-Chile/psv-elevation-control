@@ -51,7 +51,7 @@ def conectar(puerto: str) -> serial.Serial | None:
 
 def enviar(ser: serial.Serial, cmd: str) -> str:
     ser.write((cmd + "\r\n").encode())
-    time.sleep(0.2)
+    time.sleep(0.05)
     resp = ser.read(1024).decode(errors="replace").strip()
     return resp
 

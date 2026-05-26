@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 BAUD = 115200
 TIMEOUT = 3
-CMD_DELAY = 0.2
+CMD_DELAY = 0.05
 
 
 class SerialRelayService:
