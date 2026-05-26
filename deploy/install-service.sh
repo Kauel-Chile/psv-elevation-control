@@ -25,9 +25,9 @@ SRC="deploy/$SERVICE"
 DST="$HOME/.config/systemd/user/$SERVICE"
 
 if [ ! -f "$SRC" ]; then
-    echo "❌ No se encuentra $SRC"
-    echo "   Ejecutá este script desde la raíz del proyecto."
-    exit 1
+	echo "❌ No se encuentra $SRC"
+	echo "   Ejecutá este script desde la raíz del proyecto."
+	exit 1
 fi
 
 mkdir -p "$HOME/.config/systemd/user"

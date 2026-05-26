@@ -165,47 +165,52 @@ Respuesta de ejemplo:
 }
 ```
 
-## Arranque automático con systemd (Linux)
+## Arranque automático
 
-Para que el servidor se levante solo al iniciar sesión:
-
-### 1. Permisos de serial (una sola vez)
+### Linux (systemd)
 
 ```bash
+# 1. Permisos de serial (una vez) — cerrar sesión y volver
 sudo usermod -aG uucp $USER
-# Cerrar sesión y volver a entrar
-```
 
-### 2. Instalar el servicio
-
-```bash
+# 2. Instalar
 bash deploy/install-service.sh
-```
 
-### 3. Iniciar y verificar
-
-```bash
+# 3. Iniciar y verificar
 systemctl --user start psv-relay-server
 systemctl --user status psv-relay-server
-journalctl --user -u psv-relay-server -f   # logs en vivo
+journalctl --user -u psv-relay-server -f   # logs
 ```
 
-A partir de ahora el servidor arranca solo al iniciar sesión en `http://127.0.0.1:8000`.
+### Windows (Tarea programada)
+
+```powershell
+# 1. Abrir PowerShell en la carpeta del proyecto
+# 2. Ejecutar
+powershell -ExecutionPolicy Bypass -File deploy\install-scheduled-task.ps1
+
+# 3. Iniciar ahora (opcional)
+Start-ScheduledTask -TaskName 'PSV-Relay-Server'
+```
+
+O manual: ejecutar `deploy\start-server.bat` (abre una terminal).
 
 ## Archivos del proyecto
 
 ```
 psv-elevation-control/
-├── README.md                 # Este archivo
-├── pyproject.toml            # Proyecto Python (FastAPI + uvicorn + pyserial)
+├── README.md                       # Este archivo
+├── pyproject.toml                  # Proyecto Python
 ├── firmware/
-│   └── main.py               # Firmware MicroPython para NodeMCU
+│   └── main.py                     # Firmware MicroPython para NodeMCU
 ├── client/
-│   └── control_reles.py      # Cliente interactivo para PC
+│   └── control_reles.py            # Cliente interactivo para PC
 ├── server/
-│   ├── main.py               # Servidor REST FastAPI
-│   └── serial_service.py     # Servicio de comunicación serial
+│   ├── main.py                     # Servidor REST FastAPI
+│   └── serial_service.py           # Servicio de comunicación serial
 └── deploy/
-    ├── psv-relay-server.service  # Unidad systemd
-    └── install-service.sh        # Script de instalación
+    ├── psv-relay-server.service    # systemd (Linux)
+    ├── install-service.sh          # Instalador Linux
+    ├── install-scheduled-task.ps1  # Tarea programada (Windows)
+    └── start-server.bat            # Inicio manual (Windows)
 ```
