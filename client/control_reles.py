@@ -17,6 +17,9 @@ import time
 import serial
 import serial.tools.list_ports
 
+
+_RECV_TIMEOUT = 0.5
+
 BAUD = 115200
 
 COMANDOS = {
@@ -40,7 +43,7 @@ def auto_detectar() -> str | None:
 
 def conectar(puerto: str) -> serial.Serial | None:
     try:
-        ser = serial.Serial(puerto, BAUD, timeout=2)
+        ser = serial.Serial(puerto, BAUD, timeout=_RECV_TIMEOUT)
         time.sleep(1.5)
         ser.reset_input_buffer()
         return ser
@@ -51,9 +54,14 @@ def conectar(puerto: str) -> serial.Serial | None:
 
 def enviar(ser: serial.Serial, cmd: str) -> str:
     ser.write((cmd + "\r\n").encode())
-    time.sleep(0.05)
-    resp = ser.read(1024).decode(errors="replace").strip()
-    return resp
+    # Esperar primer byte (timeout del serial maneja la pausa)
+    first = ser.read(1)
+    if not first:
+        return ""
+    # 5ms para que llegue el resto del paquete
+    time.sleep(0.005)
+    rest = ser.read(ser.in_waiting or 1)
+    return (first + rest).decode(errors="replace").strip()
 
 
 def main():
