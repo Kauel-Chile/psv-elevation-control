@@ -169,31 +169,39 @@ Respuesta de ejemplo:
 
 ### Linux (systemd)
 
+**Instalar:**
 ```bash
-# 1. Permisos de serial (una vez) — cerrar sesión y volver
-sudo usermod -aG uucp $USER
+sudo usermod -aG uucp $USER          # permisos serial (una vez, cerrar sesión)
+bash deploy/install-service.sh        # instalar servicio
+systemctl --user start psv-relay-server   # iniciar ahora
+```
 
-# 2. Instalar
-bash deploy/install-service.sh
-
-# 3. Iniciar y verificar
-systemctl --user start psv-relay-server
-systemctl --user status psv-relay-server
-journalctl --user -u psv-relay-server -f   # logs
+**Detener / deshabilitar:**
+```bash
+systemctl --user stop psv-relay-server          # detener ahora
+systemctl --user disable psv-relay-server       # no arrancar al inicio
+systemctl --user status psv-relay-server        # ver estado
+journalctl --user -u psv-relay-server -f        # logs en vivo
 ```
 
 ### Windows (Tarea programada)
 
+**Instalar:**
 ```powershell
-# 1. Abrir PowerShell en la carpeta del proyecto
-# 2. Ejecutar
 powershell -ExecutionPolicy Bypass -File deploy\install-scheduled-task.ps1
-
-# 3. Iniciar ahora (opcional)
-Start-ScheduledTask -TaskName 'PSV-Relay-Server'
+Start-ScheduledTask -TaskName 'PSV-Relay-Server'   # iniciar ahora
 ```
 
-O manual: ejecutar `deploy\start-server.bat` (abre una terminal).
+**Detener / deshabilitar:**
+```powershell
+Stop-ScheduledTask -TaskName 'PSV-Relay-Server'        # detener ahora
+Disable-ScheduledTask -TaskName 'PSV-Relay-Server'     # no arrancar al inicio
+Get-ScheduledTask -TaskName 'PSV-Relay-Server' | Get-ScheduledTaskInfo  # ver estado
+```
+
+O desde `taskschd.msc` (Win+R, escribir `taskschd.msc`).
+
+**Uso manual (sin instalación):** ejecutar `deploy\start-server.bat`.
 
 ## Archivos del proyecto
 
