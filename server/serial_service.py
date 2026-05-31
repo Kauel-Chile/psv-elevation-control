@@ -13,7 +13,7 @@ import serial.tools.list_ports
 logger = logging.getLogger(__name__)
 
 BAUD = 115200
-TIMEOUT = 2
+TIMEOUT = 0.5
 
 
 class SerialRelayService:
@@ -93,9 +93,16 @@ class SerialRelayService:
             ser = self._serial()
             ser.write((comando + "\r\n").encode())
 
-            # Leer respuesta completa (timeout del serial maneja espera)
-            resp = ser.read(1024).decode(errors="replace").strip()
-            return resp if resp else None
+            # Leer primer byte (se bloquea hasta que llegue, max TIMEOUT)
+            first = ser.read(1)
+            if not first:
+                return None
+
+            # Leer el resto de lo disponible
+            time.sleep(0.01)  # 10ms para que llegue el resto
+            rest = ser.read(ser.in_waiting or 1)
+            resp = (first + rest).decode(errors="replace").strip()
+            return resp
         except Exception as e:
             logger.error("Error al enviar comando: %s", e)
             return None
