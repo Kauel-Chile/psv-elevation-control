@@ -13,7 +13,7 @@ import serial.tools.list_ports
 logger = logging.getLogger(__name__)
 
 BAUD = 115200
-TIMEOUT = 0.5
+TIMEOUT = 2
 
 
 class SerialRelayService:
@@ -34,11 +34,26 @@ class SerialRelayService:
 
         target = puerto or self._puerto or self._auto_detectar()
         if not target:
-            return "No se encontró ningún puerto serial con chip CH340/CP210x"
+            return "No se encontró ningún puerto serial (CH340/CP210x/FTDI)"
 
         try:
-            self._ser = serial.Serial(target, BAUD, timeout=TIMEOUT, write_timeout=1)
-            time.sleep(1.5)
+            # Abrir sin tocar DTR/RTS (evita reset del ESP32)
+            self._ser = serial.Serial()
+            self._ser.port = target
+            self._ser.baudrate = BAUD
+            self._ser.timeout = TIMEOUT
+            self._ser.write_timeout = 1
+            self._ser.dsrdtr = False
+            self._ser.rtscts = False
+            self._ser.dtr = False
+            self._ser.rts = False
+            time.sleep(0.3)
+            self._ser.open()
+            time.sleep(0.5)
+            self._ser.dtr = False
+            self._ser.rts = False
+            # Esperar boot del ESP32 y descartar boot message
+            time.sleep(2)
             self._ser.reset_input_buffer()
             self._puerto = target
             logger.info("Conectado a %s", target)
@@ -56,7 +71,7 @@ class SerialRelayService:
 
     @staticmethod
     def _auto_detectar() -> str | None:
-        """Busca el primer puerto con chip CH340 o CP210x."""
+        """Busca el primer puerto serial con chip CH340, CP210x o FTDI."""
         for puerto in serial.tools.list_ports.comports():
             if puerto.vid in (0x1A86, 0x10C4, 0x0403):  # CH340, CP210x, FTDI
                 logger.info(
@@ -78,16 +93,9 @@ class SerialRelayService:
             ser = self._serial()
             ser.write((comando + "\r\n").encode())
 
-            # Esperar primer byte (timeout del serial maneja la pausa)
-            first = ser.read(1)
-            if not first:
-                return None
-
-            # 5ms para que llegue el resto del paquete
-            time.sleep(0.005)
-            rest = ser.read(ser.in_waiting or 1)
-            resp = (first + rest).decode(errors="replace").strip()
-            return resp
+            # Leer respuesta completa (timeout del serial maneja espera)
+            resp = ser.read(1024).decode(errors="replace").strip()
+            return resp if resp else None
         except Exception as e:
             logger.error("Error al enviar comando: %s", e)
             return None
