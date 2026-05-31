@@ -11,4 +11,9 @@ wheels/
 # Local Pi runtime state
 .atl/
 .ruff_cache/
-__pycache__/
+
+# Firmware binaries
+*.bin
+*.zip
+*.tar.gz
+*.hex
