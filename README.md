@@ -1,10 +1,10 @@
 # PSV Elevation Control
 
-Control de relés HW-383 con NodeMCU (ESP8266) + MicroPython.
+Control de relés HW-383 con **SparkFun ESP32 Thing** + MicroPython.
 
 ## Requisitos
 
-- NodeMCU (ESP8266)
+- **ESP32** (SparkFun Thing u otra placa ESP32 con MicroPython)
 - Módulo de relés HW-383 (2 canales)
 - Cable USB con datos
 - `esptool` y `mpremote` instalados:
@@ -13,23 +13,23 @@ Control de relés HW-383 con NodeMCU (ESP8266) + MicroPython.
   uv tool install mpremote
   ```
 
-## Instalación de MicroPython en NodeMCU
+## Instalación de MicroPython en ESP32
 
 ### 1. Descargar firmware
 
-Última versión estable para ESP8266 desde [micropython.org](https://micropython.org/download/ESP8266_GENERIC/).
+Última versión estable para ESP32 desde [micropython.org](https://micropython.org/download/ESP32_GENERIC/).
 
 O directamente:
 ```bash
-curl -LO https://micropython.org/resources/firmware/ESP8266_GENERIC-20260406-v1.28.0.bin
+curl -LO https://micropython.org/resources/firmware/ESP32_GENERIC-20240602-v1.23.0.bin
 ```
 
-### 2. Poner NodeMCU en modo flash
+### 2. Poner ESP32 en modo flash
 
-1. Mantener presionado **FLASH**
-2. Presionar **RST** (sin soltar FLASH)
+1. Mantener presionado **BOOT**
+2. Presionar **RST** (sin soltar BOOT)
 3. Soltar **RST**
-4. Soltar **FLASH**
+4. Soltar **BOOT**
 
 ### 3. Flashear
 
@@ -38,11 +38,11 @@ curl -LO https://micropython.org/resources/firmware/ESP8266_GENERIC-20260406-v1.
 ls /dev/ttyUSB*
 
 # Borrar flash
-sudo env "PATH=$PATH" esptool --port /dev/ttyUSB0 erase_flash
+uv run esptool.py --chip esp32 --port /dev/ttyUSB4 erase_flash
 
 # Escribir firmware
-sudo env "PATH=$PATH" esptool --port /dev/ttyUSB0 --baud 460800 write_flash \
-  --flash_size=detect 0x0 ESP8266_GENERIC-20260406-v1.28.0.bin
+uv run esptool.py --chip esp32 --port /dev/ttyUSB4 --baud 921600 \
+  write_flash -z 0x1000 ESP32_GENERIC-20240602-v1.23.0.bin
 ```
 
 ### 4. Verificar
@@ -56,34 +56,35 @@ Salir de screen: `Ctrl+A`, luego `:quit`, Enter.
 
 ## Conexiones HW-383 → NodeMCU
 
-| HW-383   | NodeMCU       |
-|----------|---------------|
-| **VCC**  | **3.3V**      |
+| HW-383   | SparkFun ESP32 Thing |
+|----------|----------------------|
+| **VCC**  | **3.3V**             |
 | **RY-VCC** | **Vin** (~5V por USB) |
-| **GND**  | **GND**       |
-| **IN1**  | **D1** (GPIO5) |
-| **IN2**  | **D2** (GPIO4) |
+| **GND**  | **GND**              |
+| **IN1**  | **GPIO22**          |
+| **IN2**  | **GPIO23**          |
 
 ⚠️ **Importante:** el jumper entre VCC y RY-VCC del módulo debe estar **REMOVIDO**.
-VCC va a 3.3V (lógica del optoacoplador) y RY-VCC a Vin (5V para las bobinas).
+VCC va a 3.3V (lógica del optoacoplador) y RY-VCC a Vin (5V para las bobinas del relé).
 
-## Firmware del NodeMCU
+## Firmware del ESP32
 
-Subir `firmware/main.py` al NodeMCU:
+Subir `firmware/main.py` al ESP32:
 
 ```bash
-sudo env "PATH=$PATH" mpremote connect /dev/ttyUSB0 cp firmware/main.py :main.py
+mpremote connect /dev/ttyUSB4 cp firmware/main.py :main.py
+mpremote connect /dev/ttyUSB4 reset
 ```
 
-Presionar **RST** para reiniciar. Aparecerá el prompt de comandos `> `.
+Presionar **RST** en la placa. Aparecerá el prompt `> `.
 
 ### Comandos seriales
 
 | Comando    | Acción               |
 |------------|----------------------|
-| `1 on`     | Encender relé 1      |
+| `1 on`     | Encender relé 1 (GPIO22) |
 | `1 off`    | Apagar relé 1        |
-| `2 on`     | Encender relé 2      |
+| `2 on`     | Encender relé 2 (GPIO23) |
 | `2 off`    | Apagar relé 2        |
 | `all on`   | Encender ambos       |
 | `all off`  | Apagar ambos         |
