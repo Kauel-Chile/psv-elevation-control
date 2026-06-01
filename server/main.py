@@ -137,3 +137,27 @@ async def relay_off(n: int | None = None):
     if not estado:
         raise HTTPException(503, "NodeMCU no responde")
     return RelayStatus(**estado)
+
+
+@app.post("/api/direction/subir", response_model=RelayStatus)
+async def direction_subir():
+    """Subir: enciende relé 1, apaga relé 2."""
+    relay_service.encender(1)
+    relay_service.apagar(2)
+
+    estado = relay_service.estado()
+    if not estado:
+        raise HTTPException(503, "NodeMCU no responde")
+    return RelayStatus(**estado)
+
+
+@app.post("/api/direction/bajar", response_model=RelayStatus)
+async def direction_bajar():
+    """Bajar: apaga relé 1, enciende relé 2."""
+    relay_service.apagar(1)
+    relay_service.encender(2)
+
+    estado = relay_service.estado()
+    if not estado:
+        raise HTTPException(503, "NodeMCU no responde")
+    return RelayStatus(**estado)
