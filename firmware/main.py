@@ -1,7 +1,26 @@
+"""
+Firmware para control de relés HW-383
+Compatible: ESP32 y ESP8266 (NodeMCU)
+Detección automática de pines según la placa.
+"""
+
 import machine
 
-r1 = machine.Pin(22, machine.Pin.OUT, value=1)
-r2 = machine.Pin(23, machine.Pin.OUT, value=1)
+# Auto-detectar placa y configurar pines
+try:
+    import esp32  # Solo existe en ESP32
+
+    R1 = 22
+    R2 = 23
+    FREQ = 240000000  # ESP32 a velocidad normal
+except ImportError:
+    # ESP8266: reducir frecuencia para evitar brownout
+    R1 = 5  # D1
+    R2 = 4  # D2
+    machine.freq(80000000)
+
+r1 = machine.Pin(R1, machine.Pin.OUT, value=1)
+r2 = machine.Pin(R2, machine.Pin.OUT, value=1)
 
 
 def f(v):
@@ -10,34 +29,34 @@ def f(v):
 
 import sys
 
-b = ""
 sys.stdout.write(">")
+b = ""
 while True:
     c = sys.stdin.read(1)
     if c in "\r\n":
         if b:
             s = b.strip().lower()
-            if "1 on" == s:
+            if s == "1 on":
                 r1.value(0)
                 sys.stdout.write("\r\nOK 1=ON 2=" + f(r2.value()) + "\r\n>")
-            elif "1 off" == s:
+            elif s == "1 off":
                 r1.value(1)
                 sys.stdout.write("\r\nOK 1=OFF 2=" + f(r2.value()) + "\r\n>")
-            elif "2 on" == s:
+            elif s == "2 on":
                 r2.value(0)
                 sys.stdout.write("\r\nOK 1=" + f(r1.value()) + " 2=ON\r\n>")
-            elif "2 off" == s:
+            elif s == "2 off":
                 r2.value(1)
                 sys.stdout.write("\r\nOK 1=" + f(r1.value()) + " 2=OFF\r\n>")
-            elif "all on" == s:
+            elif s == "all on":
                 r1.value(0)
                 r2.value(0)
                 sys.stdout.write("\r\nOK 1=ON 2=ON\r\n>")
-            elif "all off" == s:
+            elif s == "all off":
                 r1.value(1)
                 r2.value(1)
                 sys.stdout.write("\r\nOK 1=OFF 2=OFF\r\n>")
-            elif "status" == s:
+            elif s == "status":
                 sys.stdout.write(
                     "\r\n1=" + f(r1.value()) + " 2=" + f(r2.value()) + "\r\n>"
                 )
