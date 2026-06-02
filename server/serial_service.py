@@ -98,21 +98,20 @@ class SerialRelayService:
             ser.write((comando + "\r\n").encode())
 
             # Leer respuestas hasta obtener una valida (ignorar !LIMITE)
-            resp = ""
+            hubo_limite = False
             for intento in range(3):
                 raw = ser.read_until(b">", 100)
                 logger.debug("enviar(%s) raw[%d]: %s", comando, intento, repr(raw[:40]))
                 resp = raw.decode(errors="replace")
-                # Limpiar: sacar ">" final, \r\n, nulos, etc
                 resp = resp.rstrip(">").strip(" \r\n\t\x00")
                 if not resp:
                     continue
                 if resp.startswith("!"):
+                    hubo_limite = True
                     continue
                 return resp
 
-            # Si todas las respuestas fueron !LIMITE, senializarlo
-            if resp and "LIMITE" in resp:
+            if hubo_limite:
                 return "!LIMITE"
             return None
         except Exception as e:
