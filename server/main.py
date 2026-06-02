@@ -139,6 +139,17 @@ async def relay_off(n: int | None = None):
     return RelayStatus(**estado)
 
 
+@app.post("/api/restart")
+async def restart():
+    """Reinicia el servidor (desconecta serial y sale)."""
+    relay_service.desconectar()
+
+    # Enviar señal para que el service manager reinicie
+    import os
+    import signal
+    os.kill(os.getpid(), signal.SIGINT)
+
+
 @app.post("/api/direction/subir", response_model=RelayStatus)
 async def direction_subir():
     """Subir: enciende relé 1, apaga relé 2."""
