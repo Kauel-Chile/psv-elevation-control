@@ -159,6 +159,7 @@ SERIAL_PORT=COM3 uv run uvicorn server.main:app --host 127.0.0.1 --port 8000
 | `POST` | `/api/relays/all/off`    | Apagar ambos               |
 | `POST` | `/api/direction/subir`   | Relé 1 ON, Relé 2 OFF      |
 | `POST` | `/api/direction/bajar`   | Relé 1 OFF, Relé 2 ON      |
+| `POST` | `/api/restart`            | Reinicia el servidor        |
 
 Respuesta de ejemplo:
 ```json
