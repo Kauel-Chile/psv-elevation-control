@@ -97,13 +97,18 @@ async def health():
     )
 
 
-LIMITE_MSG = "Sistema bloqueado por switch de limite"
+MSG_LIMITE = {
+    "!LIMITE1": "Limite 1 activo: no se puede subir",
+    "!LIMITE2": "Limite 2 activo: no se puede bajar",
+    "!LIMITE": "Ambos limites activos: sistema bloqueado",
+}
 
 
 def _check_limit(resp: str | None):
-    """Si la respuesta es !LIMITE, lanza HTTPException."""
-    if resp and "!LIMITE" in resp:
-        raise HTTPException(423, LIMITE_MSG)
+    """Si la respuesta es !LIMITE, lanza HTTPException con mensaje."""
+    if resp and resp.startswith("!"):
+        msg = MSG_LIMITE.get(resp, "Switch de limite activo")
+        raise HTTPException(423, msg)
 
 
 @app.get("/api/relays", response_model=RelayStatus)

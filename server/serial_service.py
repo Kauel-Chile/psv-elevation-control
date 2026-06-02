@@ -98,7 +98,7 @@ class SerialRelayService:
             ser.write((comando + "\r\n").encode())
 
             # Leer respuestas hasta obtener una valida (ignorar !LIMITE)
-            hubo_limite = False
+            ultima_alerta = ""
             for intento in range(3):
                 raw = ser.read_until(b">", 100)
                 logger.debug("enviar(%s) raw[%d]: %s", comando, intento, repr(raw[:40]))
@@ -107,12 +107,12 @@ class SerialRelayService:
                 if not resp:
                     continue
                 if resp.startswith("!"):
-                    hubo_limite = True
+                    ultima_alerta = resp
                     continue
                 return resp
 
-            if hubo_limite:
-                return "!LIMITE"
+            if ultima_alerta:
+                return ultima_alerta
             return None
         except Exception as e:
             logger.error("Error al enviar comando: %s", e)
