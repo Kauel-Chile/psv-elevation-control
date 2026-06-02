@@ -3,13 +3,21 @@ Firmware para control de reles HW-383
 Compatible: ESP32 y ESP8266 (NodeMCU)
 Switches de limite en GPIO18 y GPIO19 (activos en LOW)
 """
+
 import machine
 
 try:
     import esp32
-    R1 = 22; R2 = 23; LS1 = 18; LS2 = 19
+
+    R1 = 22
+    R2 = 23
+    LS1 = 18
+    LS2 = 19
 except ImportError:
-    R1 = 5; R2 = 4; LS1 = 18; LS2 = 19
+    R1 = 5
+    R2 = 4
+    LS1 = 18
+    LS2 = 19
     machine.freq(80000000)
 
 r1 = machine.Pin(R1, machine.Pin.OUT, value=1)
@@ -19,6 +27,7 @@ ls2 = machine.Pin(LS2, machine.Pin.IN, machine.Pin.PULL_UP)
 
 import sys
 import select
+
 poll = select.poll()
 poll.register(sys.stdin, select.POLLIN)
 
@@ -39,6 +48,9 @@ def f(v):
 sys.stdout.write(">")
 b = ""
 while True:
+    # Verificar switches de limite SIEMPRE (sin escribir nada)
+    limit_off()
+
     events = poll.poll(100)
     if not events:
         continue
@@ -77,7 +89,9 @@ while True:
                 if limit_off():
                     sys.stdout.write("\r\n1=OFF 2=OFF\r\n>")
                 else:
-                    sys.stdout.write("\r\n1=" + f(r1.value()) + " 2=" + f(r2.value()) + "\r\n>")
+                    sys.stdout.write(
+                        "\r\n1=" + f(r1.value()) + " 2=" + f(r2.value()) + "\r\n>"
+                    )
             else:
                 sys.stdout.write("\r\n?\r\n>")
             b = ""
