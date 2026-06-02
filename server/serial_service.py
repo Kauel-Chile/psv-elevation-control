@@ -99,7 +99,7 @@ class SerialRelayService:
 
             # Leer respuestas hasta obtener una valida (ignorar !LIMITE)
             resp = ""
-            for intento in range(5):
+            for intento in range(3):
                 raw = ser.read_until(b">", 100)
                 logger.debug("enviar(%s) raw[%d]: %s", comando, intento, repr(raw[:40]))
                 resp = raw.decode(errors="replace")
