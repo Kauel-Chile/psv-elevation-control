@@ -92,15 +92,20 @@ class SerialRelayService:
         try:
             ser = self._serial()
 
-            # Descartar cualquier dato residual del buffer (ej: !LIMITE)
+            # Descartar mensajes residuales (ej: !LIMITE)
             ser.reset_input_buffer()
 
             ser.write((comando + "\r\n").encode())
 
-            # Leer hasta el prompt ">" o timeout
-            resp = ser.read_until(b">", 100).decode(errors="replace")
-            # Limpiar: sacar \r\n, espacios y el ">" final
-            resp = resp.strip().rstrip(">").strip()
+            # Leer respuestas hasta obtener una valida (ignorar !LIMITE)
+            resp = ""
+            for _ in range(5):
+                resp = ser.read_until(b">", 100).decode(errors="replace")
+                resp = resp.strip().rstrip(">").strip()
+                if resp and "!" not in resp:
+                    return resp
+
+            # Si todas fueron invalidas, devolver la ultima
             return resp if resp else None
         except Exception as e:
             logger.error("Error al enviar comando: %s", e)
