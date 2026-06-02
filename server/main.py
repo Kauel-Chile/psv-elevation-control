@@ -147,6 +147,7 @@ async def restart():
     # Enviar señal para que el service manager reinicie
     import os
     import signal
+
     os.kill(os.getpid(), signal.SIGINT)
 
 

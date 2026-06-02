@@ -103,14 +103,19 @@ class SerialRelayService:
                 raw = ser.read_until(b">", 100)
                 logger.debug("enviar(%s) raw[%d]: %s", comando, intento, repr(raw[:40]))
                 resp = raw.decode(errors="replace")
-                resp = resp.strip().rstrip(">").strip()
+                # Limpiar: sacar ">" final, \r\n, nulos, etc
+                resp = resp.rstrip(">").strip(" \r\n\t\x00")
                 if not resp:
                     continue
                 if resp.startswith("!"):
                     continue
                 return resp
 
-            logger.warning("enviar(%s): 5 intentos sin respuesta valida. Ultima: %s", comando, repr(resp))
+            logger.warning(
+                "enviar(%s): 5 intentos sin respuesta valida. Ultima: %s",
+                comando,
+                repr(resp),
+            )
             return None
         except Exception as e:
             logger.error("Error al enviar comando: %s", e)
