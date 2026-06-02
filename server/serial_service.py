@@ -91,6 +91,10 @@ class SerialRelayService:
         """Envía un comando y devuelve la respuesta. None si hay error."""
         try:
             ser = self._serial()
+
+            # Descartar cualquier dato residual del buffer (ej: !LIMITE)
+            ser.reset_input_buffer()
+
             ser.write((comando + "\r\n").encode())
 
             # Leer hasta el prompt ">" o timeout
