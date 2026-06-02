@@ -97,6 +97,15 @@ async def health():
     )
 
 
+LIMITE_MSG = "Sistema bloqueado por switch de limite"
+
+
+def _check_limit(resp: str | None):
+    """Si la respuesta es !LIMITE, lanza HTTPException."""
+    if resp and "!LIMITE" in resp:
+        raise HTTPException(423, LIMITE_MSG)
+
+
 @app.get("/api/relays", response_model=RelayStatus)
 async def get_relays():
     estado = relay_service.estado()
@@ -112,9 +121,9 @@ async def relay_on(n: int | None = None):
         raise HTTPException(400, "Relé inválido (usar 1 o 2)")
 
     if n is not None:
-        relay_service.encender(n)
+        _check_limit(relay_service.encender(n))
     else:
-        relay_service.encender_todo()
+        _check_limit(relay_service.encender_todo())
 
     estado = relay_service.estado()
     if not estado:
@@ -154,7 +163,7 @@ async def restart():
 @app.post("/api/direction/subir", response_model=RelayStatus)
 async def direction_subir():
     """Subir: enciende relé 1, apaga relé 2."""
-    relay_service.encender(1)
+    _check_limit(relay_service.encender(1))
     relay_service.apagar(2)
 
     estado = relay_service.estado()
@@ -167,7 +176,7 @@ async def direction_subir():
 async def direction_bajar():
     """Bajar: apaga relé 1, enciende relé 2."""
     relay_service.apagar(1)
-    relay_service.encender(2)
+    _check_limit(relay_service.encender(2))
 
     estado = relay_service.estado()
     if not estado:

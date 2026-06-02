@@ -111,11 +111,9 @@ class SerialRelayService:
                     continue
                 return resp
 
-            logger.warning(
-                "enviar(%s): 5 intentos sin respuesta valida. Ultima: %s",
-                comando,
-                repr(resp),
-            )
+            # Si todas las respuestas fueron !LIMITE, senializarlo
+            if resp and "LIMITE" in resp:
+                return "!LIMITE"
             return None
         except Exception as e:
             logger.error("Error al enviar comando: %s", e)
