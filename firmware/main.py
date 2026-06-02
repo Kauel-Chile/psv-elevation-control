@@ -54,12 +54,33 @@ b = ""
 while True:
     # Verificar switches de limite
     if check_limits():
-        # Solo leer stdin si hay datos, sin bloquear
-        events = poll.poll(100)  # 100ms timeout
-        if events:
-            sys.stdin.read(1)  # descartar buffer si hay
-        sys.stdout.write("\r\n!LIMITE\r\n>")
-        b = ""
+        # Leer todos los bytes disponibles SIN perder b
+        events = poll.poll(10)
+        while events:
+            while events:
+                c = sys.stdin.read(1)
+                if not c:
+                    break
+                if c in "\r\n":
+                    if b:
+                        s = b.strip().lower()
+                        if s == "status":
+                            sys.stdout.write("\r\n1=OFF 2=OFF\r\n>")
+                        elif "off" in s or s == "?":
+                            sys.stdout.write("\r\nOK 1=OFF 2=OFF\r\n>")
+                        elif "on" in s:
+                            sys.stdout.write("\r\n!LIMITE\r\n>")
+                        else:
+                            sys.stdout.write("\r\n?\r\n>")
+                        b = ""
+                else:
+                    b += c
+                events = poll.poll(0)
+            # Esperar un poco por si llegan mas bytes
+            events = poll.poll(5)
+        # Sin datos: solo !LIMITE, NO resetear b
+        if not b:
+            sys.stdout.write("\r\n!LIMITE\r\n>")
         continue
 
     # Esperar dato del serial (no bloquea por mas de 100ms)

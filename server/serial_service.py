@@ -99,14 +99,19 @@ class SerialRelayService:
 
             # Leer respuestas hasta obtener una valida (ignorar !LIMITE)
             resp = ""
-            for _ in range(5):
-                resp = ser.read_until(b">", 100).decode(errors="replace")
+            for intento in range(5):
+                raw = ser.read_until(b">", 100)
+                logger.debug("enviar(%s) raw[%d]: %s", comando, intento, repr(raw[:40]))
+                resp = raw.decode(errors="replace")
                 resp = resp.strip().rstrip(">").strip()
-                if resp and "!" not in resp:
-                    return resp
+                if not resp:
+                    continue
+                if resp.startswith("!"):
+                    continue
+                return resp
 
-            # Si todas fueron invalidas, devolver la ultima
-            return resp if resp else None
+            logger.warning("enviar(%s): 5 intentos sin respuesta valida. Ultima: %s", comando, repr(resp))
+            return None
         except Exception as e:
             logger.error("Error al enviar comando: %s", e)
             return None
