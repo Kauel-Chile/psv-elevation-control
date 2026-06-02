@@ -11,7 +11,10 @@
 #>
 
 $TaskName = "PSV-Relay-Server"
-$ProjectDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+
+# Obtiene la ruta absoluta del script actual y sube dos niveles
+$ScriptPath = $MyInvocation.MyCommand.Path
+$ProjectDir = Split-Path -Parent (Split-Path -Parent $ScriptPath)
 
 # Verificar que uv existe
 $UvPath = Get-Command "uv" -ErrorAction SilentlyContinue
