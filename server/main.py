@@ -72,6 +72,7 @@ app.add_middleware(
 class RelayStatus(BaseModel):
     relay_1: str
     relay_2: str
+    limit_state: int = 0
 
 
 class HealthResponse(BaseModel):
@@ -167,9 +168,12 @@ async def restart():
 
 @app.post("/api/direction/subir", response_model=RelayStatus)
 async def direction_subir():
-    """Subir: enciende relé 1, apaga relé 2."""
-    _check_limit(relay_service.encender(1))
+    """Subir: apaga relé 2 primero (por si esta bajando),
+    luego enciende relé 1 (bloqueado por limite 1 si aplica)."""
+    # Apagar el relay opuesto primero — el sistema se detiene
     relay_service.apagar(2)
+    # Luego intentar encender el relay de movimiento
+    _check_limit(relay_service.encender(1))
 
     estado = relay_service.estado()
     if not estado:
@@ -179,7 +183,8 @@ async def direction_subir():
 
 @app.post("/api/direction/bajar", response_model=RelayStatus)
 async def direction_bajar():
-    """Bajar: apaga relé 1, enciende relé 2."""
+    """Bajar: apaga relé 1 primero (por si esta subiendo),
+    luego enciende relé 2 (bloqueado por limite 2 si aplica)."""
     relay_service.apagar(1)
     _check_limit(relay_service.encender(2))
 

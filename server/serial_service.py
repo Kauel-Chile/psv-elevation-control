@@ -133,18 +133,23 @@ class SerialRelayService:
         return self.enviar("all off")
 
     def estado(self) -> dict | None:
-        """Devuelve dict con estados de los relés, o None."""
+        """Devuelve dict con estados de los relés y limite, o None.
+        Formato esperado: "1=ON 2=OFF LS=0"
+        """
         resp = self.enviar("status")
         if not resp:
             return None
-        # Parsear "1=ON 2=OFF"
+        # Parsear "1=ON 2=OFF LS=0"
         try:
             partes = resp.split()
             d = {}
             for p in partes:
                 if "=" in p:
                     k, v = p.split("=")
-                    d[f"relay_{k}"] = v
+                    if k == "LS":
+                        d["limit_state"] = int(v)
+                    else:
+                        d[f"relay_{k}"] = v
             return d if d else None
         except Exception:
             return None

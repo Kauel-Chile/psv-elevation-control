@@ -34,16 +34,32 @@ poll = select.poll()
 poll.register(sys.stdin, select.POLLIN)
 
 
-def check_limits():
-    """Verifica ambos limites. Fuerza OFF el rele correspondiente.
+# Estado anterior de los switches para deteccion de flanco
+_ls1_prev = 1
+_ls2_prev = 1
+
+
+def read_limits():
+    """Lee switches y detecta flancos descendentes (switch se cierra).
+    Cuando un switch se cierra, fuerza OFF el relay correspondiente.
     Retorna: 0=ninguno, 1=limite1 activo, 2=limite2 activo, 3=ambos"""
+    global _ls1_prev, _ls2_prev
     flags = 0
-    if ls1.value() == 0:
-        r1.value(1)
+
+    v1 = ls1.value()
+    v2 = ls2.value()
+
+    if v1 == 0:
         flags |= 1
-    if ls2.value() == 0:
-        r2.value(1)
+        if _ls1_prev == 1:  # flanco descendente → switch acaba de cerrarse
+            r1.value(1)  # fuerza OFF rele 1
+    if v2 == 0:
         flags |= 2
+        if _ls2_prev == 1:  # flanco descendente → switch acaba de cerrarse
+            r2.value(1)  # fuerza OFF rele 2
+
+    _ls1_prev = v1
+    _ls2_prev = v2
     return flags
 
 
@@ -54,8 +70,8 @@ def f(v):
 sys.stdout.write(">")
 b = ""
 while True:
-    # Verificar limites siempre (fuerza OFF los reles)
-    check_limits()
+    # Detectar flanco descendente (switch se cierra → fuerza OFF relay)
+    read_limits()
 
     events = poll.poll(100)
     if not events:
@@ -68,7 +84,7 @@ while True:
     if c in "\r\n":
         if b:
             s = b.strip().lower()
-            limites = check_limits()  # re-verificar al procesar comando
+            limites = read_limits()  # re-verificar al procesar comando
 
             if s == "1 on":
                 if limites & 1:
@@ -104,12 +120,16 @@ while True:
                 r2.value(1)
                 sys.stdout.write("\r\nOK 1=OFF 2=OFF\r\n>")
             elif s == "status":
-                if limites:
-                    sys.stdout.write("\r\n1=OFF 2=OFF\r\n>")
-                else:
-                    sys.stdout.write(
-                        "\r\n1=" + f(r1.value()) + " 2=" + f(r2.value()) + "\r\n>"
-                    )
+                # Siempre retorna estado real + info de limites
+                sys.stdout.write(
+                    "\r\n1="
+                    + f(r1.value())
+                    + " 2="
+                    + f(r2.value())
+                    + " LS="
+                    + str(limites)
+                    + "\r\n>"
+                )
             else:
                 sys.stdout.write("\r\n?\r\n>")
             b = ""
