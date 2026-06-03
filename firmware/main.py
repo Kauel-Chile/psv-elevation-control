@@ -15,18 +15,22 @@ try:
     R2 = 23
     LS1 = 18
     LS2 = 19
+    STAT_LED = 5  # LED azul STAT en SparkFun ESP32 Thing
     machine.freq(80000000)  # Solo control de reles, no necesita 240 MHz
 except ImportError:
     R1 = 5
     R2 = 4
     LS1 = 18
     LS2 = 19
+    STAT_LED = None
     machine.freq(80000000)
 
 r1 = machine.Pin(R1, machine.Pin.OUT, value=1)
 r2 = machine.Pin(R2, machine.Pin.OUT, value=1)
 ls1 = machine.Pin(LS1, machine.Pin.IN, machine.Pin.PULL_UP)
 ls2 = machine.Pin(LS2, machine.Pin.IN, machine.Pin.PULL_UP)
+if STAT_LED is not None:
+    machine.Pin(STAT_LED, machine.Pin.OUT, value=0)  # Apagar STAT LED
 
 import sys
 import select
