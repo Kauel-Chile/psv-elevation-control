@@ -15,6 +15,7 @@ try:
     R2 = 23
     LS1 = 18
     LS2 = 19
+    machine.freq(80000000)  # Solo control de reles, no necesita 240 MHz
 except ImportError:
     R1 = 5
     R2 = 4
