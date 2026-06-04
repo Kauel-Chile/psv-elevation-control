@@ -128,6 +128,26 @@ O temporalmente:
 sudo uv run client/control_reles.py
 ```
 
+## Configuracion (.env)
+
+Copiar `env.template` como `.env` y editar segun corresponda:
+
+```bash
+cp env.template .env
+```
+
+```ini
+# .env
+RELAY_PORT=8000            # Puerto del servidor REST
+RELAY_HOST=127.0.0.1        # Host del servidor REST
+SERIAL_PORT=                # Puerto serial (vacio = auto-detect)
+```
+
+Las variables tambien se pueden pasar directamente al comando:
+```bash
+SERIAL_PORT=COM3 RELAY_PORT=9000 uv run uvicorn server.main:app
+```
+
 ## Servidor REST API
 
 El servidor **auto-detecta** el puerto serial al arrancar.
@@ -138,11 +158,6 @@ sudo uv run uvicorn server.main:app --host 127.0.0.1 --port 8000
 
 # Windows (sin sudo)
 uv run uvicorn server.main:app --host 127.0.0.1 --port 8000
-```
-
-Si el puerto no se auto-detecta, pasarlo por variable de entorno:
-```bash
-SERIAL_PORT=COM3 uv run uvicorn server.main:app --host 127.0.0.1 --port 8000
 ```
 
 ### Endpoints
@@ -172,6 +187,17 @@ Respuesta de ejemplo:
 ## Arranque automático
 
 ### Linux (systemd)
+
+Para cambiar el puerto, editar `.env` y reiniciar:
+
+```bash
+# .env
+RELAY_PORT=8080
+```
+
+```bash
+systemctl --user restart psv-relay-server
+```
 
 **Instalar:**
 ```bash

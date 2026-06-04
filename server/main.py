@@ -12,7 +12,10 @@ Endpoints:
 Uso:
     uv run uvicorn server.main:app --reload --host 127.0.0.1 --port 8000
 
-    Opcional: SERIAL_PORT=COM3 para forzar puerto en Windows.
+    Variables de entorno (o .env):
+      RELAY_HOST=127.0.0.1      host del servidor REST
+      RELAY_PORT=8000            puerto del servidor REST
+      SERIAL_PORT=               puerto serial (auto si vacio)
 """
 
 from __future__ import annotations

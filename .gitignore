@@ -8,6 +8,10 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Local environment (port, serial port)
+.env
+
 # Local Pi runtime state
 .atl/
 .ruff_cache/

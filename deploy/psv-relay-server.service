@@ -7,15 +7,21 @@ Wants=network-online.target
 Type=simple
 WorkingDirectory=/home/vitto/PSV/PROYECTOS/psv-elevation-control
 
-ExecStart=/home/vitto/.local/bin/uv run uvicorn server.main:app --host 127.0.0.1 --port 8000
+# Cargar config desde .env (si existe)
+EnvironmentFile=-/home/vitto/PSV/PROYECTOS/psv-elevation-control/.env
+
+# Valores por defecto (los sobreescribe .env si existe)
+Environment=RELAY_HOST=127.0.0.1
+Environment=RELAY_PORT=8000
+
+ExecStart=/home/vitto/.local/bin/uv run uvicorn server.main:app --host ${RELAY_HOST} --port ${RELAY_PORT}
 
 Restart=always
 RestartSec=10
 
-# El server auto-detecta el puerto serial.
-# Si no lo encuentra, forzarlo con:
-# Environment=SERIAL_PORT=/dev/ttyUSB1
-
+# El puerto serial se auto-detecta.
+# Para forzarlo, agregar en .env: SERIAL_PORT=/dev/ttyUSB1
+#
 # ⚠️  El usuario necesita estar en el grupo uucp para acceder al serial:
 #      sudo usermod -aG uucp $USER  (cerrar sesión y volver)
 

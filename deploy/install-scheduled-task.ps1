@@ -43,10 +43,21 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "🗑️  Tarea anterior eliminada." -ForegroundColor Yellow
 }
 
+# Cargar config desde .env (si existe)
+$EnvFile = "$ProjectDir\.env"
+$Port = 8000
+$Host = "127.0.0.1"
+if (Test-Path $EnvFile) {
+    Get-Content $EnvFile | ForEach-Object {
+        if ($_ -match '^RELAY_PORT=(\d+)$') { $Port = [int]$Matches[1] }
+        if ($_ -match '^RELAY_HOST=(.+)$')   { $Host  = $Matches[1] }
+    }
+}
+
 # Crear tarea programada (inicia al iniciar sesión, sin ventana)
 $Action = New-ScheduledTaskAction `
     -Execute "$UvExe" `
-    -Argument "run uvicorn server.main:app --host 127.0.0.1 --port 8000" `
+    -Argument "run uvicorn server.main:app --host $Host --port $Port" `
     -WorkingDirectory "$ProjectDir"
 
 $Trigger = New-ScheduledTaskTrigger -AtLogOn
