@@ -9,8 +9,14 @@ Endpoints:
   POST /api/relays/all/on   → encender ambos
   POST /api/relays/all/off  → apagar ambos
 
-Uso:
-    uv run uvicorn server.main:app --reload --host 127.0.0.1 --port 8000
+Uso (lee .env automaticamente):
+    uv run python -m server
+
+    Con hot-reload:
+    uv run python -m server --reload
+
+    Directo con uvicorn (no lee .env):
+    uv run uvicorn server.main:app --host 127.0.0.1 --port 8000 --reload
 
     Variables de entorno (o .env):
       RELAY_HOST=127.0.0.1      host del servidor REST
@@ -24,11 +30,15 @@ import logging
 import os
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from server.serial_service import SerialRelayService
+
+# Cargar .env antes de cualquier config
+load_dotenv()
 
 logging.basicConfig(
     level=logging.INFO,

@@ -143,7 +143,9 @@ RELAY_HOST=127.0.0.1        # Host del servidor REST
 SERIAL_PORT=                # Puerto serial (vacio = auto-detect)
 ```
 
-Las variables tambien se pueden pasar directamente al comando:
+El `.env` se **carga automáticamente** al arrancar el servidor — no hace falta pasarlo explícitamente.
+
+Las variables tambien se pueden pasar directamente al comando (tienen prioridad sobre .env):
 ```bash
 SERIAL_PORT=COM3 RELAY_PORT=9000 uv run uvicorn server.main:app
 ```
@@ -152,12 +154,22 @@ SERIAL_PORT=COM3 RELAY_PORT=9000 uv run uvicorn server.main:app
 
 El servidor **auto-detecta** el puerto serial al arrancar.
 
-```bash
-# Linux (con permisos de serial)
-sudo uv run uvicorn server.main:app --host 127.0.0.1 --port 8000
+Inicio rápido (lee `.env` automáticamente):
 
-# Windows (sin sudo)
-uv run uvicorn server.main:app --host 127.0.0.1 --port 8000
+```bash
+uv run python -m server
+```
+
+Para desarrollo con hot-reload:
+
+```bash
+uv run python -m server --reload
+```
+
+O directamente con uvicorn (ignora .env):
+
+```bash
+uv run uvicorn server.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 ### Endpoints

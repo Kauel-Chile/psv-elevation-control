@@ -5,8 +5,9 @@ description = "Control de relés HW-383 con NodeMCU (ESP8266) + MicroPython"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "fastapi",
-    "uvicorn",
-    "pyserial",
-    "esptool==4.7.0",
+  "fastapi",
+  "uvicorn",
+  "pyserial",
+  "python-dotenv",
+  "esptool==4.7.0",
 ]
