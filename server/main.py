@@ -28,7 +28,8 @@ from __future__ import annotations
 
 import logging
 import os
-from contextlib import asynccontextmanager
+import sys
+from contextlib import asynccontextmanager, suppress
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
@@ -46,6 +47,61 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+class _SuppressInvalidHttp(logging.Filter):
+    """Filtro que silencia warnings de HTTP invalido (algo sondea el puerto)."""
+
+    def filter(self, record):
+        return "Invalid HTTP request received" not in record.getMessage()
+
+
+# Windows: parchear el transporte Proactor para ignorar ConnectionResetError
+print("[DEBUG] sys.platform =", repr(sys.platform))
+if sys.platform == "win32":
+    print("[DEBUG] Windows block entered")
+    import asyncio
+    import traceback
+
+    # 1. Parche directo sobre la clase de transporte Proactor
+    try:
+        import asyncio.proactor_events as _pe
+
+        print("[DEBUG] asyncio.proactor_events imported OK")
+
+        _orig = _pe._ProactorBasePipeTransport._call_connection_lost
+        print("[DEBUG] _call_connection_lost captured")
+
+        def _patched(self, exc):
+            if isinstance(exc, ConnectionResetError):
+                return
+            # shutdown() puede lanzar ConnectionResetError si el socket
+            # ya fue cerrado por el cliente — lo ignoramos
+            with suppress(ConnectionResetError):
+                _orig(self, exc)
+
+        _pe._ProactorBasePipeTransport._call_connection_lost = _patched
+        print("[OK] Proactor transport patched for ConnectionResetError")
+        logger.info("Proactor transport patched")
+    except Exception as e:
+        print("[FAIL] Proactor patch:", e)
+        logger.warning("Proactor patch failed: %s", e)
+        logger.debug(traceback.format_exc())
+
+    # 2. Configurar SelectorEventLoop para nuevos loops
+    try:
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        print("[OK] SelectorEventLoop policy set")
+        logger.info("SelectorEventLoop policy set")
+    except Exception as e:
+        print("[FAIL] SelectorEventLoop:", e)
+        logger.warning("SelectorEventLoop policy failed: %s", e)
+        logger.debug(traceback.format_exc())
+
+    # 3. Safety net: asyncio logger a WARNING (solo Windows)
+    logging.getLogger("asyncio").setLevel(logging.WARNING)
+else:
+    print("[DEBUG] Windows block SKIPPED, platform =", repr(sys.platform))
+
 # ── Estado global ───────────────────────────────────────────
 
 relay_service = SerialRelayService()
@@ -54,6 +110,9 @@ relay_service = SerialRelayService()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Conecta al NodeMCU al iniciar, desconecta al cerrar."""
+    # Suprimir solo "Invalid HTTP request received" sin afectar otros mensajes
+    logging.getLogger("uvicorn.error").addFilter(_SuppressInvalidHttp())
+
     puerto = os.environ.get("SERIAL_PORT")
     error = relay_service.conectar(puerto)
     if error:

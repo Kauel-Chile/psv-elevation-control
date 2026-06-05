@@ -43,21 +43,11 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "🗑️  Tarea anterior eliminada." -ForegroundColor Yellow
 }
 
-# Cargar config desde .env (si existe)
-$EnvFile = "$ProjectDir\.env"
-$Port = 8000
-$Host = "127.0.0.1"
-if (Test-Path $EnvFile) {
-    Get-Content $EnvFile | ForEach-Object {
-        if ($_ -match '^RELAY_PORT=(\d+)$') { $Port = [int]$Matches[1] }
-        if ($_ -match '^RELAY_HOST=(.+)$')   { $Host  = $Matches[1] }
-    }
-}
-
 # Crear tarea programada (inicia al iniciar sesión, sin ventana)
+# python -m server lee .env automaticamente y usa SelectorEventLoop en Windows
 $Action = New-ScheduledTaskAction `
     -Execute "$UvExe" `
-    -Argument "run uvicorn server.main:app --host $Host --port $Port" `
+    -Argument "run python -m server" `
     -WorkingDirectory "$ProjectDir"
 
 $Trigger = New-ScheduledTaskTrigger -AtLogOn
@@ -69,8 +59,8 @@ $Settings = New-ScheduledTaskSettingsSet `
     -RestartInterval (New-TimeSpan -Minutes 1) `
     -StartWhenAvailable
 
-$Principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" `
-    -LogonType S4U `
+$Principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME `
+    -LogonType Interactive `
     -RunLevel Limited
 
 Register-ScheduledTask -TaskName $TaskName `

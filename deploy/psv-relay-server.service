@@ -14,7 +14,8 @@ EnvironmentFile=-/home/vitto/PSV/PROYECTOS/psv-elevation-control/.env
 Environment=RELAY_HOST=127.0.0.1
 Environment=RELAY_PORT=8000
 
-ExecStart=/home/vitto/.local/bin/uv run uvicorn server.main:app --host ${RELAY_HOST} --port ${RELAY_PORT}
+# python -m server lee .env automaticamente (RELAY_HOST, RELAY_PORT, SERIAL_PORT)
+ExecStart=/home/vitto/.local/bin/uv run python -m server
 
 Restart=always
 RestartSec=10

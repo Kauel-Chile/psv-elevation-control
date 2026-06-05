@@ -12,6 +12,13 @@ Uso:
 import os
 import sys
 
+# Windows: usar SelectorEventLoop en vez de ProactorEventLoop
+# para evitar ConnectionResetError en clientes que se desconectan
+if sys.platform == "win32":
+    import asyncio
+
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 # Cargar .env antes de importar uvicorn
 from dotenv import load_dotenv
 
